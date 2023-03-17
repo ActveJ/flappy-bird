@@ -1,23 +1,118 @@
-# Compiled class file
-*.class
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Flappy Bird</title>
+    <style>
+      #game {
+        position: relative;
+        width: 400px;
+        height: 600px;
+        margin: 0 auto;
+        background-color: #87CEEB;
+        border: 1px solid #000000;
+      }
 
-# Log file
-*.log
+      #bird {
+        position: absolute;
+        top: 250px;
+        left: 50px;
+        width: 40px;
+        height: 30px;
+        background-color: #FFD700;
+        border-radius: 20px;
+      }
 
-# BlueJ files
-*.ctxt
+      .pipe {
+        position: absolute;
+        width: 50px;
+        height: 300px;
+        background-color: #228B22;
+        border-radius: 10px;
+      }
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+      .top {
+        top: 0;
+      }
 
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+      .bottom {
+        bottom: 0;
+      }
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+      #score {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #FFFFFF;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game">
+      <div id="bird"></div>
+      <div id="score">Score: 0</div>
+    </div>
+    <script>
+      const game = document.getElementById('game');
+      const bird = document.getElementById('bird');
+      const score = document.getElementById('score');
+      let birdTop = 250;
+      let birdLeft = 50;
+      let pipeInterval;
+      let scoreCount = 0;
+
+      function startGame() {
+        pipeInterval = setInterval(addPipe, 2000);
+        document.addEventListener('keydown', jump);
+      }
+
+      function addPipe() {
+        const pipePos = Math.floor(Math.random() * 450) + 75;
+        const pipeTop = document.createElement('div');
+        const pipeBottom = document.createElement('div');
+        pipeTop.classList.add('pipe', 'top');
+        pipeBottom.classList.add('pipe', 'bottom');
+        pipeTop.style.left = game.offsetWidth + 'px';
+        pipeTop.style.top = '0';
+        pipeBottom.style.left = game.offsetWidth + 'px';
+        pipeBottom.style.top = pipePos + 'px';
+        game.appendChild(pipeTop);
+        game.appendChild(pipeBottom);
+        movePipe(pipeTop);
+        movePipe(pipeBottom);
+      }
+
+      function movePipe(pipe) {
+        let pipeLeft = game.offsetWidth;
+        const pipeInterval = setInterval(() => {
+          if (pipeLeft === -50) {
+            clearInterval(pipeInterval);
+            game.removeChild(pipe);
+          } else if (pipeLeft > 0 && pipeLeft <= 90 && birdLeft === 90 && (birdTop < pipe.offsetTop || birdTop > pipe.offsetTop + 300)) {
+            gameOver();
+          } else {
+            pipeLeft -= 10;
+            pipe.style.left = pipeLeft + 'px';
+            if (pipeLeft === 90) {
+              scoreCount++;
+              score.innerHTML = 'Score: ' + scoreCount;
+            }
+          }
+        }, 50);
+      }
+
+      function jump(e) {
+        if (e.code === 'Space') {
+          birdTop -= 50;
+          if (birdTop < 0) {
+            birdTop = 0;
+          }
+          bird.style.top = birdTop + 'px';
+        }
+      }
+
+      function gameOver() {
+        clearInterval(pipeInterval);
+        document.removeEventListener('keydown', jump);
